@@ -1,0 +1,19 @@
+---
+description: Next.js 16 / feature-slice UI conventions
+globs: client/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Client
+
+Read `wiki/client.md` and `wiki/conventions.md` before editing. This is Next 16 — see `client/AGENTS.md`.
+
+- Pages stay thin; logic lives in `features/<domain>/`
+- Export new public APIs from `features/*/index.ts`
+- Browser API calls: relative `/api` + `credentials: "include"` via `shared/lib/api.ts`
+- Do not add `middleware.ts`; auth gate is `proxy.ts`
+- Await `params` (they are Promises)
+- TanStack Query for server data; Zustand only for chat preferences
+- shadcn Base UI: `render` + `nativeButton={false}`, not `asChild`
+- Tailwind v4: `bg-linear-to-*`, not `bg-gradient-to-*`
+- Reuse 3s polling hooks for PENDING/PROCESSING sources and artifacts

@@ -3,6 +3,7 @@
  */
 
 import { inngest } from "../inngest/client.js";
+import { sendInngestEventOrRun } from "./inngest-send.js";
 
 /**
  * Enqueues an artifact generation job to run asynchronously via Inngest.
@@ -15,8 +16,16 @@ export async function enqueueArtifactGeneration(input: {
     artifactId: string;
     workspaceId: string;
 }) {
-    await inngest.send({
-        name: "artifact/generate",
-        data: input,
-    });
+    await sendInngestEventOrRun(
+        () =>
+            inngest.send({
+                name: "artifact/generate",
+                data: input,
+            }),
+        () =>
+            import("../services/artifact.service.js").then((mod) =>
+                mod.processArtifactById(input.artifactId),
+            ),
+        "artifact/generate",
+    );
 }

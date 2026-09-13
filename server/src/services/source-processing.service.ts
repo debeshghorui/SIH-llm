@@ -36,7 +36,6 @@ import {
     updateSourceRecord,
     type SourceRecord,
 } from "../repositories/source.repository.js";
-
 /** Shape of JSON stored on a source's `metadata` column. */
 type SourceMetadata = {
     fileUrl?: string;
@@ -112,13 +111,36 @@ export function markSourceProcessing(sourceId: string) {
  * Called when extract, chunk, or embed steps throw.
  *
  */
+function toProcessingErrorMessage(error: unknown) {
+    if (!(error instanceof Error)) {
+        return "Source processing failed";
+    }
+
+    const prismaCode =
+        "code" in error && typeof error.code === "string" ? error.code : null;
+
+    if (prismaCode === "P2028") {
+        return "Timed out while saving document chunks. Try Reprocess.";
+    }
+
+    if (error.name.startsWith("Prisma") || error.message.includes("prisma.")) {
+        return "Failed to save document chunks. Try Reprocess.";
+    }
+
+    const message = error.message.trim();
+    if (message.length > 280) {
+        return `${message.slice(0, 277)}...`;
+    }
+
+    return message || "Source processing failed";
+}
+
 export async function markSourceFailed(
     sourceId: string,
     error: unknown,
     existingMetadata: SourceRecord["metadata"],
 ) {
-    const message =
-        error instanceof Error ? error.message : "Source processing failed";
+    const message = toProcessingErrorMessage(error);
 
     const metadata =
         existingMetadata &&
@@ -315,4 +337,33 @@ export async function removeSourceFromIndex(
 export async function listChunksForSource(sourceId: string) {
     const chunks = await findChunksBySourceId(sourceId);
     return { chunks, count: chunks.length };
+}
+
+/**
+ * Runs the full ingest pipeline without Inngest steps.
+ * Used as a local fallback when the Inngest Dev Server is not running.
+ */
+export async function processSourceById(sourceId: string) {
+    await markSourceProcessing(sourceId);
+
+    try {
+        const extracted = await extractSourceContent(sourceId);
+        await chunkSourceContent(sourceId, extracted.text, extracted.pages);
+
+        const source = await findSourceById(sourceId);
+        if (!source) {
+            throw new Error("Source not found");
+        }
+
+        const chunks = await findChunksBySourceId(sourceId);
+        await embedAndIndexSource(source, chunks);
+
+        return { sourceId, status: "READY" as const, chunkCount: chunks.length };
+    } catch (error) {
+        const source = await findSourceById(sourceId);
+        if (source) {
+            await markSourceFailed(sourceId, error, source.metadata);
+        }
+        throw error;
+    }
 }

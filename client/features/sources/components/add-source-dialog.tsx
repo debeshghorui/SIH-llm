@@ -190,8 +190,8 @@ export function AddSourceDialog({
                 <DialogHeader>
                     <DialogTitle>Add source</DialogTitle>
                     <DialogDescription>
-                        Add knowledge to this workspace from text, files, or
-                        the web.
+                        Files and URLs are saved immediately. Search indexing
+                        runs after that — wait for Ready before chatting.
                     </DialogDescription>
                 </DialogHeader>
 

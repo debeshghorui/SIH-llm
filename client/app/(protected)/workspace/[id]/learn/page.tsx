@@ -9,9 +9,11 @@ type LearnPageProps = {
 };
 
 export default async function LearnPage({ params }: LearnPageProps) {
-    await requireAuth();
     const { id } = await params;
-    const workspace = await getWorkspaceOrNull(id);
+    const [, workspace] = await Promise.all([
+        requireAuth(),
+        getWorkspaceOrNull(id),
+    ]);
 
     if (!workspace) {
         notFound();

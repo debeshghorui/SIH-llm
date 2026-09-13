@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { getServerApiUrl } from "@/shared/lib/server-api";
 import { authClient } from "./auth-client";
 
 export type Session = typeof authClient.$Infer.Session;
@@ -8,7 +9,7 @@ export async function getSession(): Promise<Session | null> {
     const cookie = requestHeaders.get("cookie") ?? "";
 
     const response = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/auth/get-session`,
+        `${getServerApiUrl()}/api/auth/get-session`,
         {
             headers: { cookie },
             cache: "no-store",

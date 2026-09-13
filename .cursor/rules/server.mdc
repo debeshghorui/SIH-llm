@@ -1,0 +1,18 @@
+---
+description: Express / Prisma / Inngest conventions
+globs: server/**/*.{ts,js,prisma}
+alwaysApply: false
+---
+
+# Server
+
+Read `wiki/server.md`, `wiki/api.md`, and `wiki/conventions.md` before editing.
+
+- Layer: route → Zod controller → service → repository / lib
+- Wrap handlers in `asyncHandler`
+- Ownership via `getWorkspaceByIdForUser` (404, not 403)
+- ESM: relative imports need `.js` suffixes
+- Prisma v7: `prisma-client` generator, adapter in `src/lib/db.ts`, URL in `prisma.config.ts`
+- Keep better-auth mounted before `express.json()`
+- Inngest for source ingest, artifacts, conversation summarize — do not process those inline in the request
+- Memory is Mem0 (`src/lib/mem0.ts`), not Prisma

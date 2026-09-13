@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useSources } from "../hooks/use-sources";
 import { sourceRoutes } from "../lib/routes";
+import { SourceStatusBadge } from "./source-status-badge";
 import { SourceTypeIcon } from "./source-type-icon";
 
 type SourceSidebarListProps = {
@@ -60,9 +61,13 @@ export function SourceSidebarList({
                                     }
                                 >
                                     <SourceTypeIcon type={source.type} />
-                                    <span className="truncate">
+                                    <span className="min-w-0 flex-1 truncate">
                                         {source.title}
                                     </span>
+                                    <SourceStatusBadge
+                                        status={source.status}
+                                        className="shrink-0 text-[10px]"
+                                    />
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         ))}

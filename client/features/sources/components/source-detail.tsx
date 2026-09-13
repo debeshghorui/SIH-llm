@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import { ArrowLeftIcon, ExternalLinkIcon } from "lucide-react";
+import { ArrowLeftIcon, ExternalLinkIcon, RefreshCwIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { ApiError } from "@/shared/lib/api";
-import { useSource } from "../hooks/use-sources";
+import { useReprocessSource, useSource } from "../hooks/use-sources";
 import { SOURCE_TYPE_LABELS } from "../lib/constants";
 import { sourceRoutes } from "../lib/routes";
 import { MarkdownPreview } from "./markdown-preview";
@@ -20,6 +21,7 @@ type SourceDetailProps = {
 
 export function SourceDetail({ workspaceId, sourceId }: SourceDetailProps) {
     const { data: source, isLoading, error } = useSource(workspaceId, sourceId);
+    const reprocess = useReprocessSource(workspaceId);
 
     if (isLoading) {
         return (
@@ -69,6 +71,10 @@ export function SourceDetail({ workspaceId, sourceId }: SourceDetailProps) {
             : null;
     const isProcessing =
         source.status === "PENDING" || source.status === "PROCESSING";
+    const canReprocess =
+        source.status === "FAILED" ||
+        source.status === "PENDING" ||
+        source.status === "PROCESSING";
 
     return (
         <div className="flex flex-1 flex-col gap-6 p-6">
@@ -101,6 +107,23 @@ export function SourceDetail({ workspaceId, sourceId }: SourceDetailProps) {
                             : null}
                     </p>
                 </div>
+                {canReprocess ? (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={reprocess.isPending}
+                        onClick={() =>
+                            void reprocess.mutateAsync(source.id)
+                        }
+                    >
+                        {reprocess.isPending ? (
+                            <Spinner />
+                        ) : (
+                            <RefreshCwIcon />
+                        )}
+                        Reprocess
+                    </Button>
+                ) : null}
             </div>
 
             {source.url ? (
@@ -136,8 +159,9 @@ export function SourceDetail({ workspaceId, sourceId }: SourceDetailProps) {
 
             {isProcessing ? (
                 <div className="rounded-2xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-                    Processing source — extracting text, chunking, and
-                    indexing for search…
+                    Saved. Now extracting text, chunking, and writing
+                    vectors to Pinecone. This is separate from Cloudinary /
+                    Firecrawl and can take a minute.
                 </div>
             ) : source.status === "FAILED" ? (
                 <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-sm">
@@ -149,6 +173,22 @@ export function SourceDetail({ workspaceId, sourceId }: SourceDetailProps) {
                             {processingError}
                         </p>
                     ) : null}
+                    <Button
+                        className="mt-4"
+                        variant="outline"
+                        size="sm"
+                        disabled={reprocess.isPending}
+                        onClick={() =>
+                            void reprocess.mutateAsync(source.id)
+                        }
+                    >
+                        {reprocess.isPending ? (
+                            <Spinner />
+                        ) : (
+                            <RefreshCwIcon />
+                        )}
+                        Try again
+                    </Button>
                 </div>
             ) : source.content ? (
                 <MarkdownPreview content={source.content} />

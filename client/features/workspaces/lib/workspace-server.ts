@@ -1,13 +1,12 @@
 import { headers } from "next/headers";
+import { getServerApiUrl } from "@/shared/lib/server-api";
 import type { Workspace } from "./types";
-
-const apiUrl = process.env.API_URL ?? "http://localhost:8080";
 
 async function fetchWorkspace(id: string): Promise<Workspace | null> {
     const requestHeaders = await headers();
     const cookie = requestHeaders.get("cookie") ?? "";
 
-    const response = await fetch(`${apiUrl}/api/workspaces/${id}`, {
+    const response = await fetch(`${getServerApiUrl()}/api/workspaces/${id}`, {
         headers: { cookie },
         cache: "no-store",
     });

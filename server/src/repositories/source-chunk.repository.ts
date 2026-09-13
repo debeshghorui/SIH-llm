@@ -29,25 +29,29 @@ export function deleteChunksBySourceId(sourceId: string) {
     });
 }
 
-export function createSourceChunks(chunks: CreateSourceChunkData[]) {
+export async function createSourceChunks(chunks: CreateSourceChunkData[]) {
     if (chunks.length === 0) {
-        return Promise.resolve([]);
+        return [];
     }
 
-    return prisma.$transaction(
-        chunks.map((chunk) =>
-            prisma.sourceChunk.create({
-                data: {
-                    sourceId: chunk.sourceId,
-                    index: chunk.index,
-                    content: chunk.content,
-                    tokenCount: chunk.tokenCount ?? null,
-                    metadata: chunk.metadata,
-                },
-                select: sourceChunkSelect,
-            }),
-        ),
-    );
+    const batchSize = 100;
+
+    for (let i = 0; i < chunks.length; i += batchSize) {
+        const batch = chunks.slice(i, i + batchSize);
+        await prisma.sourceChunk.createMany({
+            data: batch.map((chunk) => ({
+                sourceId: chunk.sourceId,
+                index: chunk.index,
+                content: chunk.content,
+                tokenCount: chunk.tokenCount ?? null,
+                ...(chunk.metadata !== undefined
+                    ? { metadata: chunk.metadata }
+                    : {}),
+            })),
+        });
+    }
+
+    return findChunksBySourceId(chunks[0]!.sourceId);
 }
 
 export function findChunksBySourceId(sourceId: string) {

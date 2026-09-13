@@ -3,6 +3,8 @@
  */
 
 import { inngest } from "../inngest/client.js";
+import { processSourceById } from "../services/source-processing.service.js";
+import { sendInngestEventOrRun } from "./inngest-send.js";
 
 /**
  * Enqueues a source processing job to run asynchronously via Inngest.
@@ -17,8 +19,13 @@ export async function enqueueSourceProcessing(input: {
     sourceId: string;
     workspaceId: string;
 }) {
-    await inngest.send({
-        name: "source/created",
-        data: input,
-    });
+    await sendInngestEventOrRun(
+        () =>
+            inngest.send({
+                name: "source/created",
+                data: input,
+            }),
+        () => processSourceById(input.sourceId),
+        "source/created",
+    );
 }

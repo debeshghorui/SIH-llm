@@ -25,6 +25,14 @@ const nextConfig: NextConfig = {
                 source: "/api/memory",
                 destination: `${apiUrl}/api/memory`,
             },
+            {
+                source: "/api/inngest",
+                destination: `${apiUrl}/api/inngest`,
+            },
+            {
+                source: "/api/inngest/:path*",
+                destination: `${apiUrl}/api/inngest/:path*`,
+            },
         ];
     },
 };

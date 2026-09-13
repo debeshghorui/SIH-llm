@@ -9,9 +9,11 @@ type ArtifactPageProps = {
 };
 
 export default async function ArtifactPage({ params }: ArtifactPageProps) {
-    await requireAuth();
     const { id, artifactId } = await params;
-    const workspace = await getWorkspaceOrNull(id);
+    const [, workspace] = await Promise.all([
+        requireAuth(),
+        getWorkspaceOrNull(id),
+    ]);
 
     if (!workspace) {
         notFound();

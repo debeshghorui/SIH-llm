@@ -307,9 +307,11 @@ export async function reprocessSourcesForWorkspace(
 ) {
     await getWorkspaceByIdForUser(workspaceId, userId);
 
-    const sources = await findSourcesByWorkspaceId(workspaceId, {
-        status: "FAILED",
-    });
+    const sources = input.sourceIds?.length
+        ? await findSourcesByWorkspaceId(workspaceId)
+        : await findSourcesByWorkspaceId(workspaceId, {
+              status: "FAILED",
+          });
 
     const targets = input.sourceIds?.length
         ? sources.filter((source) => input.sourceIds?.includes(source.id))

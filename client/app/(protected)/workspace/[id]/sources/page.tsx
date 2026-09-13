@@ -11,9 +11,11 @@ type WorkspaceSourcesPageProps = {
 export default async function WorkspaceSourcesPage({
     params,
 }: WorkspaceSourcesPageProps) {
-    await requireAuth();
     const { id } = await params;
-    const workspace = await getWorkspaceOrNull(id);
+    const [, workspace] = await Promise.all([
+        requireAuth(),
+        getWorkspaceOrNull(id),
+    ]);
 
     if (!workspace) {
         notFound();

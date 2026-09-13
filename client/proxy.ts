@@ -4,10 +4,11 @@ import {
     isProtectedRoute,
     isUnauthenticatedRoute,
 } from "@/features/auth";
+import { getServerApiUrl } from "@/shared/lib/server-api";
 
 async function fetchSession(request: NextRequest) {
     const response = await fetch(
-        new URL("/api/auth/get-session", request.nextUrl.origin),
+        `${getServerApiUrl()}/api/auth/get-session`,
         {
             headers: {
                 cookie: request.headers.get("cookie") ?? "",
@@ -42,5 +43,10 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/workspace/:path*", "/login"],
+    matcher: [
+        "/dashboard/:path*",
+        "/workspace/:path*",
+        "/settings/:path*",
+        "/login",
+    ],
 };

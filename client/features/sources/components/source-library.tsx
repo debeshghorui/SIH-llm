@@ -375,7 +375,8 @@ export function SourceLibrary({ workspaceId }: SourceLibraryProps) {
                                 source={source}
                                 onDelete={setDeletingSource}
                                 onReprocess={
-                                    source.status === "FAILED"
+                                    source.status === "FAILED" ||
+                                    source.status === "PENDING"
                                         ? (target) =>
                                               void reprocessFailed.mutateAsync([
                                                   target.id,

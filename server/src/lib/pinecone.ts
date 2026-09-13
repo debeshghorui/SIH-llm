@@ -140,10 +140,23 @@ export async function deleteSourceVectors(
     workspaceId: string,
     sourceId: string,
 ) {
-    const index = await getPineconeIndex();
-    await index.namespace(workspaceId).deleteMany({
-        filter: { sourceId: { $eq: sourceId } },
-    });
+    try {
+        const index = await getPineconeIndex();
+        await index.namespace(workspaceId).deleteMany({
+            filter: { sourceId: { $eq: sourceId } },
+        });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const name = error instanceof Error ? error.name : "unknown";
+        const isMissing =
+            name === "PineconeNotFoundError" ||
+            message.includes("404") ||
+            /not found|namespace/i.test(message);
+        if (isMissing) {
+            return;
+        }
+        throw error;
+    }
 }
 
 /**

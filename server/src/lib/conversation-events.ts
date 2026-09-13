@@ -3,6 +3,8 @@
  */
 
 import { inngest } from "../inngest/client.js";
+import { summarizeConversationById } from "../services/conversation-memory.service.js";
+import { sendInngestEventOrRun } from "./inngest-send.js";
 
 /**
  * Enqueues a conversation summary job to run asynchronously via Inngest.
@@ -17,8 +19,13 @@ export async function enqueueConversationSummarize(input: {
     conversationId: string;
     userId: string;
 }) {
-    await inngest.send({
-        name: "conversation/summarize",
-        data: input,
-    });
+    await sendInngestEventOrRun(
+        () =>
+            inngest.send({
+                name: "conversation/summarize",
+                data: input,
+            }),
+        () => summarizeConversationById(input.conversationId, input.userId),
+        "conversation/summarize",
+    );
 }

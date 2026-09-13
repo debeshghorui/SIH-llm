@@ -1,0 +1,21 @@
+---
+description: Load Chaibook wiki context and keep it updated
+alwaysApply: true
+---
+
+# Project wiki
+
+Chaibook context lives in `wiki/`. Read `wiki/README.md` at the start of a task, then only the pages you need.
+
+- Overview / run: `wiki/overview.md`
+- System design: `wiki/architecture.md`
+- Backend: `wiki/server.md`
+- Frontend: `wiki/client.md`
+- Endpoints: `wiki/api.md`
+- Schema: `wiki/data-model.md`
+- RAG, ingest, memory, Learn: `wiki/features.md`
+- Coding rules: `wiki/conventions.md`
+
+Do not invent APIs, models, or env vars. If you change architecture, routes, schema, or conventions, update the matching wiki page in the same change.
+
+Root `AGENTS.md` is the short version of this map.

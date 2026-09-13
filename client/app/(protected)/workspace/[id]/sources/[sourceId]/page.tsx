@@ -11,9 +11,11 @@ type SourceDetailPageProps = {
 export default async function SourceDetailPage({
     params,
 }: SourceDetailPageProps) {
-    await requireAuth();
     const { id, sourceId } = await params;
-    const workspace = await getWorkspaceOrNull(id);
+    const [, workspace] = await Promise.all([
+        requireAuth(),
+        getWorkspaceOrNull(id),
+    ]);
 
     if (!workspace) {
         notFound();
